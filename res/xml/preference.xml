@@ -8,8 +8,8 @@
         <PreferenceScreen
                 android:title="@string/preference_login_title">
             <intent android:action="android.intent.action.VIEW"
-                    android:targetPackage="org.jarx.android.livedoor.reader"
-                    android:targetClass="org.jarx.android.livedoor.reader.LoginActivity" />
+                    android:targetPackage="jp.gr.java_conf.t1h.ldruck"
+                    android:targetClass="jp.gr.java_conf.t1h.ldruck.LoginActivity" />
         </PreferenceScreen>
 
     </PreferenceCategory>
@@ -91,8 +91,8 @@
         <PreferenceScreen
                 android:title="@string/preference_info_about_title">
             <intent android:action="android.intent.action.VIEW"
-                    android:targetPackage="org.jarx.android.livedoor.reader"
-                    android:targetClass="org.jarx.android.livedoor.reader.AboutActivity" />
+                    android:targetPackage="jp.gr.java_conf.t1h.ldruck"
+                    android:targetClass="jp.gr.java_conf.t1h.ldruck.AboutActivity" />
         </PreferenceScreen>
 
     </PreferenceCategory>
