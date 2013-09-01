@@ -1,20 +1,16 @@
 package org.jarx.android.livedoor.reader;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.Timer;
-import java.util.TimerTask;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
-import android.widget.Toast;
+
+import java.io.IOException;
+import java.text.MessageFormat;
 
 public class ReaderService extends Service {
 
@@ -22,6 +18,8 @@ public class ReaderService extends Service {
         = "org.jarx.android.livedoor.reader.action.SYNC_SUBS_FINISHED";
     public static final String ACTION_UNREAD_MODIFIED
         = "org.jarx.android.livedoor.reader.action.UNREAD_MODIFIED";
+    public static final String ACTION_SYNC_FINISHED
+            = "org.jarx.android.livedoor.reader.action.SYNC_FINISHED";
 
     private static final String TAG = "ReaderService";
     private static final long RMAN_INTERVAL = 30 * 60 * 1000;
@@ -40,7 +38,7 @@ public class ReaderService extends Service {
     private ReaderManager rman;
     private long rmanExpiredTime;
     private NotificationManager nman;
-    private Timer timer;
+//    private Timer timer;
     private boolean syncRunning;
     private boolean started;
     private MessageFormat syncFinishedFormat;
@@ -53,24 +51,24 @@ public class ReaderService extends Service {
         this.syncFinishedFormat = new MessageFormat(
             getText(R.string.msg_sync_finished).toString());
 
-        Context c = getApplicationContext();
-        long interval = ReaderPreferences.getSyncInterval(c);
-        if (interval > 0) {
-            long delay = 0;
-            long lastSyncTime = ReaderPreferences.getLastSyncTime(c);
-            if (lastSyncTime > 0) {
-                long now = System.currentTimeMillis();
-                delay = Math.max((lastSyncTime + interval) - now, 0);
-            }
-            startSyncTimer(delay, interval);
-        }
+//        Context c = getApplicationContext();
+//        long interval = ReaderPreferences.getSyncInterval(c);
+//        if (interval > 0) {
+//            long delay = 0;
+//            long lastSyncTime = ReaderPreferences.getLastSyncTime(c);
+//            if (lastSyncTime > 0) {
+//                long now = System.currentTimeMillis();
+//                delay = Math.max((lastSyncTime + interval) - now, 0);
+//            }
+//            startSyncTimer(delay, interval);
+//        }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        cancelSyncTimer();
-    }
+//    @Override
+//    public void onDestroy() {
+//        super.onDestroy();
+//        cancelSyncTimer();
+//    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -112,86 +110,87 @@ public class ReaderService extends Service {
     }
 
     public boolean startSync() {
-        long interval = ReaderPreferences.getSyncInterval(getApplicationContext());
-        return startSyncTimer(0, interval);
-    }
+//        long interval = ReaderPreferences.getSyncInterval(getApplicationContext());
 
-    public synchronized boolean startSyncTimer(long delay, long interval) {
         if (this.syncRunning) {
             return false;
         }
-        if (this.timer != null) {
-            this.timer.cancel();
-        }
-        this.timer = new Timer();
+//        if (this.timer != null) {
+//            this.timer.cancel();
+//        }
+//        this.timer = new Timer();
 
-        TimerTask timerTask = new TimerTask() {
+        new Thread() {
             public void run() {
+
                 Context context = getApplicationContext();
                 ReaderManager rm = ReaderManager.newInstance(context);
                 ReaderService.this.setSyncRunning(true);
                 try {
                     if (rm.login()) {
                         ReaderPreferences.setLastSyncTime(
-                            context, System.currentTimeMillis());
-                        ReaderService.this.notifySyncStarted();
+                                context, System.currentTimeMillis());
                         int syncCount = rm.sync();
-                        ReaderService.this.notifySyncFinished(syncCount);
                         rm.logout();
+                        ReaderService.this.sendBroadcast(
+                                new Intent(ReaderService.ACTION_SYNC_FINISHED));
+
                     }
-                } catch (IOException e) {
-                    ReaderService.this.notifySyncError(e);
-                } catch (ReaderException e) {
-                    ReaderService.this.notifySyncError(e);
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     ReaderService.this.notifySyncError(e);
                 } finally {
                     ReaderService.this.setSyncRunning(false);
                 }
             }
-        };
-        if (interval == 0) {
-            this.timer.schedule(timerTask, delay);
-        } else {
-            this.timer.schedule(timerTask, delay, interval);
-        }
+        }.start();
+
+//        TimerTask timerTask = new TimerTask() {
+//            public void run() {
+//
+//            }
+//        };
+//        if (interval == 0) {
+//            this.timer.schedule(timerTask, delay);
+//        } else {
+//            this.timer.schedule(timerTask, delay, interval);
+//        }
         return true;
     }
 
-    public synchronized void cancelSyncTimer() {
-        if (this.timer != null) {
-            this.timer.cancel();
-            this.timer = null;
-        }
-    }
+//    public synchronized void cancelSyncTimer() {
+//        if (this.timer != null) {
+//            this.timer.cancel();
+//            this.timer = null;
+//        }
+//    }
 
     private void setSyncRunning(boolean syncRunning) {
         this.syncRunning = syncRunning;
     }
 
-    private boolean isSyncNotifiable() {
-        return ReaderPreferences.isSyncNotifiable(getApplicationContext());
-    }
-
-    private void notifySyncStarted() {
-        if (!isSyncNotifiable()) {
-            return;
-        }
-        sendNotify(android.R.drawable.stat_notify_sync,
-            getText(R.string.msg_sync_started));
-    }
-
-    private void notifySyncFinished(int syncCount) {
-        if (!isSyncNotifiable()) {
-            return;
-        }
-        Context context = getApplicationContext();
-        ReaderManager rm = ReaderManager.newInstance(context);
-        int unreadCount = rm.countUnread();
-        String msg = this.syncFinishedFormat.format(
-            new Integer[]{syncCount, unreadCount});
-        sendNotify(android.R.drawable.stat_notify_sync, msg);
-    }
+//    private boolean isSyncNotifiable() {
+//        return ReaderPreferences.isSyncNotifiable(getApplicationContext());
+//    }
+//
+//    private void notifySyncStarted() {
+//        if (!isSyncNotifiable()) {
+//            return;
+//        }
+//        sendNotify(android.R.drawable.stat_notify_sync,
+//            getText(R.string.msg_sync_started));
+//    }
+//
+//    private void notifySyncFinished(int syncCount) {
+//        if (!isSyncNotifiable()) {
+//            return;
+//        }
+//        Context context = getApplicationContext();
+//        ReaderManager rm = ReaderManager.newInstance(context);
+//        int unreadCount = rm.countUnread();
+//        String msg = this.syncFinishedFormat.format(
+//            new Integer[]{syncCount, unreadCount});
+//        sendNotify(R.drawable.icon_s, msg);
+//    }
 
     private void notifySyncError(IOException e) {
         e.printStackTrace();
@@ -213,6 +212,8 @@ public class ReaderService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this, 0, intent, 0);
         notification.setLatestEventInfo(this, title, message, pendingIntent);
+        notification.flags = Notification.FLAG_AUTO_CANCEL;
+
         this.nman.notify(R.layout.sub_list, notification);
     }
 }

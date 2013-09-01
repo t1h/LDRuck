@@ -16,7 +16,7 @@
                 android:paddingTop="1dip"
                 android:singleLine="true"
                 android:layout_weight="1"
-                android:textAppearance="@android:attr/textAppearanceMedium" />
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <ImageButton android:id="@+id/btn_search"
                 android:layout_width="wrap_content"
@@ -48,7 +48,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="32dip"
-                android:textSize="16dip"
+                android:textSize="@dimen/sub_title_text_size"
                 android:paddingLeft="8dip"
                 android:paddingRight="8dip"
                 android:gravity="center_vertical"

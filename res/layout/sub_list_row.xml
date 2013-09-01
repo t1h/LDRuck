@@ -10,16 +10,16 @@
             android:layout_height="fill_parent">
 
         <ImageView android:id="@+id/icon"
-                android:layout_width="32dip"
-                android:layout_height="32dip"
-                android:scaleType="center" />
+                android:layout_width="@dimen/sub_list_row_icon_size"
+                android:layout_height="fill_parent"
+                android:scaleType="fitCenter"/>
 
         <TextView android:id="@+id/title"
                 android:layout_gravity="center_vertical"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="36dip"
-                android:textSize="16dip"
+                android:textSize="@dimen/title_text_size"
                 android:paddingLeft="8dip"
                 android:paddingRight="8dip" />
 
@@ -42,7 +42,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:textSize="10dip"
+                android:textSize="@dimen/etc_text_size"
                 android:paddingLeft="8dip"
                 android:paddingRight="8dip" />
 

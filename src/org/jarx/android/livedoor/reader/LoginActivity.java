@@ -9,6 +9,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.text.method.MovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -71,11 +74,14 @@ public class LoginActivity extends Activity {
             }
         });
 
-        WebView info = (WebView) findViewById(R.id.info);
-        info.loadData(getText(R.string.msg_login_info_html).toString(),
-            "text/html", "utf-8");
-        WebSettings settings = info.getSettings();
-        settings.setDefaultFontSize(11);
+        TextView info = (TextView) findViewById(R.id.info);
+        info.setText(Html.fromHtml(getString(R.string.msg_login_info_html)));
+        MovementMethod movementmethod = LinkMovementMethod.getInstance();
+        info.setMovementMethod(movementmethod);
+//        info.loadData(getString(R.string.msg_login_info_html),
+//            "text/html", "utf-8");
+//        WebSettings settings = info.getSettings();
+//        settings.setDefaultFontSize(11);
     }
 
     @Override

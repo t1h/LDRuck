@@ -43,10 +43,12 @@ public final class Subscription implements Serializable, BaseColumns {
     // NOTE: database version 7 or later
     public static final String _LAST_ITEM_ID = "last_item_id";
 
+    public static final String _LAST_STORED_ON = "last_stored_on";
+
     public static final String[] DEFAULT_SELECT = {
         _ID, _URI, _TITLE, _RATE, _SUBSCRIBERS_COUNT, _UNREAD_COUNT,
         _FOLDER, _MODIFIED_TIME, _ITEM_SYNC_TIME, _DISABLED,
-        _READ_ITEM_ID, _LAST_ITEM_ID
+        _READ_ITEM_ID, _LAST_ITEM_ID, _LAST_STORED_ON
     };
     public static final String[] SELECT_ICON = {_ICON};
 
@@ -68,7 +70,8 @@ public final class Subscription implements Serializable, BaseColumns {
         + _ITEM_SYNC_TIME + " integer default 0,"
         + _DISABLED + " integer default 0,"
         + _READ_ITEM_ID + " integer,"
-        + _LAST_ITEM_ID + " integer"
+        + _LAST_ITEM_ID + " integer,"
+        + _LAST_STORED_ON + " integer"
         + ")";
 
     public static final String[] INDEX_COLUMNS = {
@@ -133,6 +136,7 @@ public final class Subscription implements Serializable, BaseColumns {
     private boolean disabled;
     private long readItemId;
     private long lastItemId;
+    private long lastStoredOn;
 
     public Subscription() {
     }
@@ -260,6 +264,14 @@ public final class Subscription implements Serializable, BaseColumns {
         this.lastItemId = lastItemId;
     }
 
+    public long getLastStoredOn() {
+        return lastStoredOn;
+    }
+
+    public void setLastStoredOn(long lastStoredOn) {
+        this.lastStoredOn = lastStoredOn;
+    }
+
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -290,6 +302,7 @@ public final class Subscription implements Serializable, BaseColumns {
         private final int posDisabled;
         private final int posReadItemId;
         private final int posLastItemId;
+        private final int posLastStoredOn;
 
         public FilterCursor(Cursor cursor) {
             this(cursor, null);
@@ -310,6 +323,7 @@ public final class Subscription implements Serializable, BaseColumns {
             this.posDisabled = getColumnIndex(Subscription._DISABLED);
             this.posReadItemId = getColumnIndex(Subscription._READ_ITEM_ID);
             this.posLastItemId = getColumnIndex(Subscription._LAST_ITEM_ID);
+            this.posLastStoredOn = getColumnIndex(Subscription._LAST_STORED_ON);
         }
 
         public Subscription getSubscription() {
@@ -326,6 +340,7 @@ public final class Subscription implements Serializable, BaseColumns {
             sub.setDisabled(getInt(this.posDisabled) == 1);
             sub.setReadItemId(getLong(this.posReadItemId));
             sub.setLastItemId(getLong(this.posLastItemId));
+            sub.setLastStoredOn(getLong(this.posLastStoredOn));
             return sub;
         }
     }

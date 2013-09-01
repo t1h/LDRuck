@@ -1,31 +1,24 @@
 package org.jarx.android.livedoor.reader;
 
-import java.io.IOException;
-import android.app.Activity; 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.text.ClipboardManager;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ListView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.IOException;
 
 public class PinActivity extends ListActivity {
 
@@ -70,31 +63,6 @@ public class PinActivity extends ListActivity {
                 PinActivity.this.progressPinClear();
             }
         });
-        final View shareUrls = findViewById(R.id.share_urls);
-        shareUrls.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                String text = "";
-                Pin.FilterCursor cursor = new Pin.FilterCursor(listQuery());
-                try {
-                    StringBuilder sb = new StringBuilder(cursor.getCount() * 64);
-                    while (cursor.moveToNext()) {
-                        Pin pin = cursor.getPin();
-                        sb.append(pin.getUri());
-                        sb.append("\n");
-                    }
-                    text = new String(sb);
-                } finally {
-                    cursor.close();
-                }
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_SUBJECT, getText(R.string.pin_title));
-                intent.putExtra(Intent.EXTRA_TEXT, text);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(Intent.createChooser(intent,
-                    getText(R.string.txt_share_urls)));
-            }
-        });
 
         initListAdapter();
     }
@@ -111,10 +79,21 @@ public class PinActivity extends ListActivity {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Pin pin = (Pin) v.getTag();
-        new AlertDialog.Builder(this)
-            .setTitle(pin.getTitle())
-            .setNegativeButton("Cancel", null)
-            .setItems(R.array.dialog_pin_action, new PinActionListener(pin)).show();
+
+        if (pin != null) {
+
+            // 開くとピンは外れる
+            Intent service = new Intent(PinActivity.this, ReaderIntentService.class);
+            service.setAction(ReaderIntentService.ACTION_PIN_REMOVE);
+            service.putExtra("url", pin.getUri());
+            startService(service);
+
+            Intent intent = new Intent(this, PinDetailActivity.class)
+                    .putExtra("url", pin.getUri())
+                    .putExtra("title", pin.getTitle());
+            startActivityForResult(intent, 1);
+        }
+
     }
 
     private Cursor listQuery() {
@@ -149,14 +128,18 @@ public class PinActivity extends ListActivity {
         dialog.show();
         new Thread() {
             public void run() {
-                ReaderManager rm = PinActivity.this.readerManager;
-                try {
-                    rm.syncPins();
-                } catch (IOException e) {
-                    showToast(e);
-                } catch (ReaderException e) {
-                    showToast(e);
-                }
+//                ReaderManager rm = PinActivity.this.readerManager;
+//                try {
+//                    rm.syncPins();
+//                } catch (IOException e) {
+//                    showToast(e);
+//                } catch (ReaderException e) {
+//                    showToast(e);
+//                }
+                Intent intent = new Intent(PinActivity.this, ReaderIntentService.class);
+                intent.setAction(ReaderIntentService.ACTION_PIN_SYNC);
+                startService(intent);
+
                 handler.post(new Runnable() {
                     public void run() {
                         PinActivity.this.initListAdapter();
@@ -282,11 +265,6 @@ public class PinActivity extends ListActivity {
             case 0:
                 startActivity(new Intent(Intent.ACTION_VIEW,
                     Uri.parse(this.pin.getUri())));
-                break;
-            case 1:
-                ClipboardManager cm = (ClipboardManager)
-                    getSystemService(CLIPBOARD_SERVICE);
-                cm.setText(this.pin.getUri());
                 break;
             case 2:
                 PinActivity.this.progressPinRemove(this.pin);

@@ -23,7 +23,7 @@
 
     <item android:id="@+id/menu_item_pin"
         android:orderInCategory="8"
-        android:title="Pin list"
+        android:title="@string/pin_title"
         android:icon="@drawable/ic_menu_agenda" />
 
     <item android:id="@+id/menu_item_setting"

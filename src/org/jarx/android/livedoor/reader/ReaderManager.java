@@ -1,32 +1,32 @@
 package org.jarx.android.livedoor.reader;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.json.simple.parser.ContentHandler;
-import org.json.simple.parser.ParseException;
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
-import static org.jarx.android.livedoor.reader.Utils.*; 
+
+import org.json.simple.parser.ContentHandler;
+import org.json.simple.parser.ParseException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.jarx.android.livedoor.reader.Utils.asInt;
+import static org.jarx.android.livedoor.reader.Utils.asLong;
+import static org.jarx.android.livedoor.reader.Utils.asString;
 
 public class ReaderManager {
 
@@ -48,6 +48,32 @@ public class ReaderManager {
         this.context = context;
     }
 
+    /*
+     * 既読化
+     */
+    Integer readMarkSubscription(Subscription sub) {
+        Long subId = sub.getId();
+
+        Uri subUri = ContentUris.withAppendedId(Subscription.CONTENT_URI, subId);
+
+        // Items
+        ContentResolver cr = this.context.getContentResolver();
+        StringBuilder where = new StringBuilder(64);
+        where.append(Item._UNREAD).append(" = 1");
+        where.append(" and ");
+        where.append(Item._SUBSCRIPTION_ID).append(" = ").append(subId);
+
+        ContentValues values = new ContentValues();
+        values.put(Item._UNREAD, 0);
+        Integer updateCount = cr.update(Item.CONTENT_URI, values, new String(where), null);
+
+        // Subs
+        values.clear();
+        values.put(Subscription._UNREAD_COUNT, 0);
+        cr.update(subUri, values, null, null);
+        return updateCount;
+    }
+
     public int sync() throws IOException, ReaderException {
         if (!isLogined()) {
             login();
@@ -57,14 +83,18 @@ public class ReaderManager {
         String debugPrefix = "sync " + (unreadOnly ? "unread only": "all");
         Log.d(TAG, debugPrefix + " started.");
 
+        ContentResolver cr = this.context.getContentResolver();
+        cr.delete(Item.CONTENT_URI, null, null);
+        cr.delete(Subscription.CONTENT_URI, null, null);
+
         SubsHandler subsHandler = new SubsHandler();
         syncSubs(unreadOnly, subsHandler);
 
         ReaderException firstError = null;
         int syncCount = 0;
+
         String subWhere = Subscription._MODIFIED_TIME
             + " <> " + Subscription._ITEM_SYNC_TIME;
-        ContentResolver cr = this.context.getContentResolver();
         Subscription.FilterCursor cursor = new Subscription.FilterCursor(
             cr.query(Subscription.CONTENT_URI, null, subWhere, null, null));
         try {
@@ -86,16 +116,6 @@ public class ReaderManager {
             }
         } finally {
             cursor.close();
-        }
-
-        if (ReaderPreferences.isAutoTouchAll(this.context)) {
-            for (long id: subsHandler.ids) {
-                try {
-                    this.client.touchAll(id);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         Log.d(TAG, debugPrefix + " finished.");
@@ -198,6 +218,7 @@ public class ReaderManager {
             ContentValues subValues = new ContentValues();
             subValues.put(Subscription._ITEM_SYNC_TIME, subModifiedTime);
             subValues.put(Subscription._UNREAD_COUNT, unreadCount);
+            subValues.put(Subscription._LAST_STORED_ON, itemsHandler.lastStoredOn);
             if (itemsHandler.lastItemId > 0) {
                 subValues.put(Subscription._LAST_ITEM_ID, itemsHandler.lastItemId);
             }
@@ -296,9 +317,10 @@ public class ReaderManager {
 
     public boolean pinAdd(final String uri, final String title, boolean nowait)
             throws IOException, ReaderException {
+
         try {
             final ContentResolver cr = this.context.getContentResolver();
-            cr.delete(Pin.CONTENT_URI, Pin._URI + " = ? and " + Pin._ACTION 
+            cr.delete(Pin.CONTENT_URI, Pin._URI + " = ? and " + Pin._ACTION
                 + " > " + Pin.ACTION_NONE, new String[]{uri});
 
             final ContentValues values = new ContentValues();
@@ -498,6 +520,7 @@ public class ReaderManager {
 
         private final long subId;
         private final long subLastItemId;
+        private long lastStoredOn;
         private ContentResolver cr;
         private ContentValues values;
         private boolean startItems;
@@ -517,6 +540,7 @@ public class ReaderManager {
         }
 
         public boolean startObject() throws ParseException, IOException {
+
             if (this.startItems) {
                 this.values = new ContentValues();
                 this.values.put(Item._SUBSCRIPTION_ID, this.subId);
@@ -564,12 +588,18 @@ public class ReaderManager {
 
         public boolean primitive(Object value)
                 throws ParseException, IOException {
+
+            if (this.key.equals("last_stored_on")) {
+                this.lastStoredOn = asLong(value);
+            }
+
             if (this.key == null || this.values == null) {
                 return true;
             } else if (this.key.equals("id")) {
                 this.values.put(Item._ID, asLong(value));
             } else if (this.key.equals("title")) {
-                this.values.put(Item._TITLE, asString(value));
+                String title = Html.fromHtml(asString(value)).toString();
+                this.values.put(Item._TITLE, title);
             } else if (this.key.equals("body")) {
                 this.values.put(Item._BODY, asString(value));
             } else if (this.key.equals("author")) {
@@ -581,6 +611,9 @@ public class ReaderManager {
             } else if (this.key.equals("modified_on")) {
                 this.values.put(Item._MODIFIED_TIME, asLong(value));
             }
+
+
+
             return true;
         }
     }

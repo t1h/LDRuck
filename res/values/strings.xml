@@ -1,15 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">LDReader</string>
+    <string name="app_name">LDRuck</string>
 
     <string name="msg_running">Processing..</string>
     <string name="msg_login_running">Login..</string>
     <string name="msg_login_success_and_sync_running">Login success. synchronization running.</string>
     <string name="msg_login_fail">Login failure</string>
     <string name="msg_login_info_html"><![CDATA[
-        LDReader using <a href="http://reader.livedoor.com/">livedoor Reader</a>.
-        <div style="text-align:center;margin-top:5px;">Created by: <a href="http://trycatch.jp/">Trycatch, Inc.</a></div>
+        LDRuck using <a href="http://reader.livedoor.com/">livedoor Reader</a>.
     ]]></string>
     <string name="msg_sync_started">Synchronization started.</string>
     <string name="msg_sync_running">Synchronization running.</string>
@@ -30,6 +29,7 @@
     <string name="msg_confirm_touch_feed_local">Do you mark all as read in this feed?</string>
     <string name="msg_confirm_touch_all_local">Do you mark all as read?</string>
     <string name="msg_confirm_browse">Browse url?</string>
+    <string name="msg_confirm_unsubscribe">Do you want to stop subscribing to this feed?</string>
 
     <string name="err_io">Network error</string>
 
@@ -47,12 +47,23 @@
     <string name="login_title">Login</string>
     <string name="pin_title">Pin list</string>
 
+    <string name="menu_settings">Settings</string>
+    <string name="menu_view_type">View Type</string>
+    <string name="menu_sort">Sort</string>
+    <string name="menu_reload">Reload</string>
+    <string name="menu_pin">Pin</string>
+    <string name="menu_unsubscribe">Unsubscribe</string>
+    <string name="share">Share</string>
+
     <string name="dialog_sub_list_view_title">Select view type</string>
     <string name="dialog_sub_list_sort_title">Select sort type</string>
     <string name="dialog_sub_list_remove_items">Remove items</string>
     <string name="dialog_items_reload_title">Reload items</string>
     <string name="dialog_items_move_title">Move to</string>
     <string name="dialog_items_remove_title">Remove Items</string>
+
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_cancel">Cancel</string>
 
     <string name="preference_category_account">Account</string>
     <string name="preference_login_title">Login settings</string>
@@ -61,7 +72,7 @@
     <string name="preference_sync_interval_title">Interval</string>
     <string name="preference_sync_interval_summary">How oftern should synchronize?</string>
     <string name="preference_auto_touch_all_title">Auto send reads</string>
-    <string name="preference_auto_touch_all_summary">Send reads to server with synchronization.</string>
+    <string name="preference_auto_touch_all_summary">Send reads to server.</string>
     <string name="preference_sync_unread_only_title">Unreads only</string>
     <string name="preference_sync_unread_only_summary">Synchronization unreads only</string>
     <string name="preference_sync_notifiable_title">Notifiable information</string>
@@ -73,12 +84,12 @@
     <string name="preference_view_disable_item_links_title">Disable links</string>
     <string name="preference_view_disable_item_links_summary">Disable raunch browser if link clicked.</string>
     <string name="preference_view_show_item_controlls_title">Show item controlls</string>
-    <string name="preference_view_show_item_controlls_summary">Don't hide item controlls.</string>
+    <string name="preference_view_show_item_controlls_summary">Don\'t hide item controlls.</string>
     <string name="preference_view_omit_item_list">Omit item list</string>
     <string name="preference_view_omit_item_list_summary"></string>
     <string name="preference_view_item_body_font_size_title">Item view font size</string>
 
     <string name="preference_category_info">Information</string>
-    <string name="preference_info_about_title">About LDReader</string>
+    <string name="preference_info_about_title">About LDRuck</string>
 
 </resources>

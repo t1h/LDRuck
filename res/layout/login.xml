@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_marginLeft="20dip"
             android:text="@string/txt_login_id"
-            android:textAppearance="@android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <EditText android:id="@+id/edit_login_id"
             android:layout_height="wrap_content"
@@ -28,14 +28,14 @@
             android:layout_marginLeft="20dip"
             android:layout_marginRight="20dip"
             android:singleLine="true"
-            android:textAppearance="@android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView android:id="@+id/lbl_password"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_marginLeft="20dip"
             android:text="@string/txt_password"
-            android:textAppearance="@android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <EditText android:id="@+id/edit_password"
             android:layout_height="wrap_content"
@@ -44,7 +44,7 @@
             android:layout_marginRight="20dip"
             android:password="true"
             android:singleLine="true"
-            android:textAppearance="@android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <LinearLayout
             android:layout_width="fill_parent"
@@ -65,8 +65,12 @@
 
     </LinearLayout>
 
-    <WebView android:id="@+id/info"
+    <TextView android:id="@+id/info"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="8sp"
+            android:background="#ffffff"
+            android:textColor="#000000"
+            android:textSize="@dimen/text_size_small"/>
 
 </LinearLayout>

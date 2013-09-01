@@ -1,16 +1,14 @@
 package org.jarx.android.livedoor.reader;
 
-import java.io.IOException;
-import android.app.Activity; 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,12 +26,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 public class ItemListActivity extends ListActivity
         implements ItemActivityHelper.Itemable {
@@ -126,6 +126,8 @@ public class ItemListActivity extends ListActivity
         });
 
         initListAdapter();
+
+        ItemActivityHelper.progressTouchFeedLocal2(this);
     }
 
     @Override
@@ -158,42 +160,51 @@ public class ItemListActivity extends ListActivity
             cursor.close();
         }
         TextView subTitleView = (TextView) findViewById(R.id.sub_title);
-        subTitleView.setText(this.sub.getTitle()
-            + " (" + this.sub.getUnreadCount() + ")");
+        subTitleView.setText(this.sub.getTitle());
     }
 
-    @Override
-    protected Dialog onCreateDialog(int id) {
-        switch (id) {
-        case ItemActivityHelper.DIALOG_RELOAD:
-            return ItemActivityHelper.createDialogReload(this);
-        case DIALOG_MOVE:
-            return new AlertDialog.Builder(this)
-                .setIcon(R.drawable.alert_dialog_icon)
-                .setTitle(R.string.dialog_items_move_title)
-                .setSingleChoiceItems(R.array.dialog_items_move, 0,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int i) {
-                            switch (i) {
-                            case 0:
-                                moveToLastRead();
-                                break;
-                            case 1:
-                                moveToNewUnread();
-                                break;
-                            case 2:
-                                moveToOldUnread();
-                                break;
-                            }
-                            dialog.dismiss();
-                        }
-                    }
-                ).create();
-        case ItemActivityHelper.DIALOG_REMOVE:
-            return ItemActivityHelper.createDialogRemove(this);
-        }
-        return null;
-    }
+//    @Override
+//    protected Dialog onCreateDialog(int id) {
+//        switch (id) {
+//        case ItemActivityHelper.DIALOG_RELOAD:
+//            return new AlertDialog.Builder(this)
+//                .setTitle(R.string.dialog_items_reload_title)
+//                .setSingleChoiceItems(R.array.dialog_items_reload_items, 0,
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int i) {
+//                                ItemActivityHelper.progressSyncItems(ItemListActivity.this, i == 1);
+//                                dialog.dismiss();
+//                            }
+//                        }
+//                ).create();
+//
+//        case DIALOG_MOVE:
+//            return new AlertDialog.Builder(this)
+//                .setIcon(R.drawable.alert_dialog_icon)
+//                .setTitle(R.string.dialog_items_move_title)
+//                .setSingleChoiceItems(R.array.dialog_items_move, 0,
+//                    new DialogInterface.OnClickListener() {
+//                        public void onClick(DialogInterface dialog, int i) {
+//                            switch (i) {
+//                            case 0:
+//                                moveToLastRead();
+//                                break;
+//                            case 1:
+//                                moveToNewUnread();
+//                                break;
+//                            case 2:
+//                                moveToOldUnread();
+//                                break;
+//                            }
+//                            dialog.dismiss();
+//                        }
+//                    }
+//                ).create();
+//        case ItemActivityHelper.DIALOG_REMOVE:
+//            return ItemActivityHelper.createDialogRemove(this);
+//        }
+//        return null;
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -206,29 +217,108 @@ public class ItemListActivity extends ListActivity
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
         case R.id.menu_item_reload:
-            showDialog(ItemActivityHelper.DIALOG_RELOAD);
+//            showDialog(ItemActivityHelper.DIALOG_RELOAD);
+
+//            AlertDialog dialog1 = new AlertDialog.Builder(this)
+//                    .setTitle(R.string.dialog_items_reload_title)
+//                    .setSingleChoiceItems(R.array.dialog_items_reload_items, 0,
+//                            new DialogInterface.OnClickListener() {
+//                                public void onClick(DialogInterface dialog, int i) {
+//                                    ItemActivityHelper.progressSyncItems(ItemListActivity.this, i == 1);
+//                                    dialog.dismiss();
+//                                }
+//                            }
+//                    ).create();
+//            dialog1.show();
+            ItemActivityHelper.progressSyncItems(ItemListActivity.this, false);
+
             return true;
-        case R.id.menu_item_touch_feed_local:
-            ItemActivityHelper.progressTouchFeedLocal(this);
+        case R.id.menu_item_pin_list:
+            startActivity(new Intent(this, PinActivity.class));
             return true;
-        case R.id.menu_item_move:
-            showDialog(DIALOG_MOVE);
+//        case R.id.menu_item_touch_feed_local:
+//            ItemActivityHelper.progressTouchFeedLocal(this);
+//            return true;
+//        case R.id.menu_item_move:
+//            showDialog(DIALOG_MOVE);
+//            return true;
+//        case R.id.menu_unreads:
+//            toggleUnreadOnly(menuItem);
+//            return true;
+//        case R.id.menu_search:
+//            toggleSearchBar();
+//            return true;
+//        case R.id.menu_remove:
+//            showDialog(ItemActivityHelper.DIALOG_REMOVE);
+//            return true;
+        case R.id.menu_unsubscribe:
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.msg_confirm_unsubscribe)
+                    .setTitle(sub.getTitle())
+                    .setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Intent intent = new Intent(ItemListActivity.this, ReaderIntentService.class);
+                            intent.setAction(ReaderIntentService.ACTION_UNSUBSCRIBE);
+                            intent.putExtra("subscriptionId", sub.getId());
+                            startService(intent);
+
+                            Intent backIntent = new Intent(ItemListActivity.this, SubListActivity.class);
+                            backIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(backIntent);
+
+                            try {
+                                getContentResolver().applyBatch(ReaderProvider.AUTHORITY,
+                                        processClearSubscription(sub.getId()));
+                            } catch (Exception e) {
+                                Log.d(TAG, "Error clearing data from Subscription", e);
+                            }
+
+
+
+                        }
+                    })
+                    .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User cancelled the dialog
+                        }
+                    });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
             return true;
-        case R.id.menu_unreads:
-            toggleUnreadOnly(menuItem);
-            return true;
-        case R.id.menu_search:
-            toggleSearchBar();
-            return true;
-        case R.id.menu_remove:
-            showDialog(ItemActivityHelper.DIALOG_REMOVE);
-            return true;
+
         case R.id.menu_item_setting:
             startActivityForResult(new Intent(this, ReaderPreferenceActivity.class),
                 REQUEST_PREFERENCES);
             return true;
         }
         return false;
+    }
+
+    private ArrayList<ContentProviderOperation> processClearSubscription(long subscriptionId) {
+
+        ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
+
+        batch.add(ContentProviderOperation
+                .newDelete(Subscription.CONTENT_URI)
+                .withSelection(
+                        Subscription._ID + " = ?",
+                        new String[]{
+                                Long.toString(subscriptionId)
+                        })
+                .build());
+//        batch.add(ContentProviderOperation
+//                .newDelete(Item.CONTENT_URI)
+//                .withSelection(
+//                        Item._SUBSCRIPTION_ID + " = ?",
+//                        new String[]{
+//                                Long.toString(subscriptionId)
+//                        })
+//                .build());
+
+
+        return batch;
     }
 
     @Override
@@ -239,9 +329,9 @@ public class ItemListActivity extends ListActivity
             initListAdapter();
             moveToItemId(this.lastItemId);
         } else if (requestCode == REQUEST_PREFERENCES) {
-            if (ReaderPreferences.isOmitItemList(this)) {
-                finish();
-            }
+//            if (ReaderPreferences.isOmitItemList(this)) {
+//                finish();
+//            }
         }
     }
 
@@ -437,40 +527,6 @@ public class ItemListActivity extends ListActivity
         cursor.moveToPosition(pos);
     }
 
-    private void progressTouchFeedLocal() {
-        final ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setIndeterminate(true);
-        dialog.setMessage(getText(R.string.msg_touch_running));
-        dialog.show();
-        final long subId = this.sub.getId();
-        new Thread() {
-            public void run() {
-                ContentResolver cr = getContentResolver();
-                ContentValues values = new ContentValues();
-
-                StringBuilder where = new StringBuilder(64);
-                where.append(Item._UNREAD + " = 1");
-                where.append(" and ");
-                where.append(Item._SUBSCRIPTION_ID + " = " + subId);
-                values.put(Item._UNREAD, 0);
-                cr.update(Item.CONTENT_URI, values, new String(where), null);
-
-                values.clear();
-                values.put(Subscription._UNREAD_COUNT, 0);
-                cr.update(ItemListActivity.this.subUri, values, null, null);
-
-                handler.post(new Runnable() {
-                    public void run() {
-                        initListAdapter();
-                        ActivityHelper.showToast(getApplicationContext(),
-                            getText(R.string.msg_touch_feed_local));
-                        dialog.dismiss();
-                    }
-                });
-            }
-        }.start();
-    }
-
     private class ItemsAdapter extends ResourceCursorAdapter {
 
         private ItemsAdapter(Context context, Cursor cursor) {
@@ -501,14 +557,46 @@ public class ItemListActivity extends ListActivity
             ImageView iconView = (ImageView) view.findViewById(R.id.icon_read_unread);
             TextView titleView = (TextView) view.findViewById(R.id.title);
             TextView summaryView = (TextView) view.findViewById(R.id.summary);
+            TextView urlView = (TextView) view.findViewById(R.id.url);
+            CheckBox pinView = (CheckBox) view.findViewById(R.id.checkBox);
 
             Item item = itemCursor.getItem();
             iconView.setImageResource(item.isUnread()
                 ? R.drawable.item_unread: R.drawable.item_read);
             titleView.setText(item.getTitle());
             summaryView.setText(item.getSummary());
+            urlView.setText(item.getUri());
+            pinView.setChecked(item.isPin());
 
             view.setTag(item.getId());
+
+
+
+            Item.FilterCursor c = new Item.FilterCursor(cursor);
+
+            final String url = c.getItem().getUri();
+            final String title = c.getItem().getTitle();
+
+            CheckBox pinCheckbox = (CheckBox) view.findViewById(R.id.checkBox);
+            pinCheckbox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CheckBox checkbox = (CheckBox)v;
+
+                    Intent intent = new Intent(ItemListActivity.this, ReaderIntentService.class);
+                    if(checkbox.isChecked()){
+                        intent.setAction(ReaderIntentService.ACTION_PIN_ADD);
+                        intent.putExtra("url", url);
+                        intent.putExtra("title", title);
+                    }else{
+                        intent.setAction(ReaderIntentService.ACTION_PIN_REMOVE);
+                        intent.putExtra("url", url);
+                    }
+
+                    startService(intent);
+                }
+            });
+
         }
 
         @Override
@@ -516,5 +604,6 @@ public class ItemListActivity extends ListActivity
             super.onContentChanged();
             ItemListActivity.this.bindSubTitleView(true);
         }
+
     }
 }

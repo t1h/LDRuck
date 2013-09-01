@@ -26,6 +26,7 @@ public class Item implements Serializable, BaseColumns {
     public static final String _BODY = "body";
     public static final String _AUTHOR = "author";
     public static final String _UNREAD = "unread";
+    public static final String _PIN = "pin";
     public static final String _CREATED_TIME = "created_time";
     public static final String _MODIFIED_TIME = "modified_time";
 
@@ -38,6 +39,7 @@ public class Item implements Serializable, BaseColumns {
         + _BODY + " text,"
         + _AUTHOR + " text,"
         + _UNREAD + " integer,"
+        + _PIN + " integer,"
         + _CREATED_TIME + " integer,"
         + _MODIFIED_TIME + " integer"
         + ")";
@@ -72,6 +74,15 @@ public class Item implements Serializable, BaseColumns {
     private boolean unread;
     private long createdTime;
     private long modifiedTime;
+    private boolean pin;
+
+    public boolean isPin() {
+        return pin;
+    }
+    public void setPin(boolean pin) {
+        this.pin = pin;
+    }
+
 
     public Item() {
     }
@@ -188,6 +199,7 @@ public class Item implements Serializable, BaseColumns {
         private final int posBody;
         private final int posAuthor;
         private final int posUnread;
+        private final int posPin;
         private final int posCreatedTime;
         private final int posModifiedTime;
 
@@ -205,6 +217,7 @@ public class Item implements Serializable, BaseColumns {
             this.posBody = getColumnIndex(Item._BODY);
             this.posAuthor = getColumnIndex(Item._AUTHOR);
             this.posUnread = getColumnIndex(Item._UNREAD);
+            this.posPin = getColumnIndex(Item._PIN);
             this.posCreatedTime = getColumnIndex(Item._CREATED_TIME);
             this.posModifiedTime = getColumnIndex(Item._MODIFIED_TIME);
         }
@@ -218,6 +231,7 @@ public class Item implements Serializable, BaseColumns {
             item.setBody(getString(this.posBody));
             item.setAuthor(getString(this.posAuthor));
             item.setUnread(getInt(this.posUnread) == 1);
+            item.setPin(getInt(this.posPin) == 1);
             item.setCreatedTime(getLong(this.posCreatedTime));
             item.setModifiedTime(getLong(this.posModifiedTime));
             return item;

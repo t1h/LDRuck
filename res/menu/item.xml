@@ -1,34 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
+
     <item android:id="@+id/menu_item_reload"
         android:orderInCategory="1"
         android:title="Reload"
         android:icon="@drawable/ic_menu_refresh" />
-
     <item android:id="@+id/menu_item_touch_feed_local"
         android:orderInCategory="2"
         android:title="Mark as read"
         android:icon="@android:drawable/ic_menu_rotate" />
-
+-->
     <item android:id="@+id/menu_item_pin"
         android:orderInCategory="7"
-        android:title="Pin"
+        android:title="@string/menu_pin"
         android:icon="@drawable/ic_menu_mark" />
 
     <item android:id="@+id/menu_item_pin_list"
         android:orderInCategory="8"
-        android:title="Pin list"
+        android:title="@string/pin_title"
         android:icon="@drawable/ic_menu_agenda" />
-
+<!--
     <item android:id="@+id/menu_remove"
         android:orderInCategory="98"
         android:title="Remove Items"
         android:icon="@android:drawable/ic_menu_delete" />
-
+-->
     <item android:id="@+id/menu_item_setting"
         android:orderInCategory="99"
-        android:title="Settings"
+        android:title="@string/menu_settings"
         android:icon="@android:drawable/ic_menu_preferences" />
+
+    <item android:id="@+id/menu_share"
+          android:title="@string/share"
+          android:showAsAction="ifRoom"
+          android:icon="@android:drawable/ic_menu_share" />
 
 </menu>

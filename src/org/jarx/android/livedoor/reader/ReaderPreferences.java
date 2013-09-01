@@ -10,15 +10,15 @@ public class ReaderPreferences {
     public static final String KEY_PASSWORD = "password";
     public static final String KEY_SUBS_VIEW = "subs_view";
     public static final String KEY_SUBS_SORT = "subs_sort";
-    public static final String KEY_SYNC_INTERVAL_HOURS = "sync_interval_hours";
+//    public static final String KEY_SYNC_INTERVAL_HOURS = "sync_interval_hours";
     public static final String KEY_SYNC_UNREAD_ONLY = "sync_unread_only";
-    public static final String KEY_SYNC_NOTIFIABLE = "sync_notifiable";
+//    public static final String KEY_SYNC_NOTIFIABLE = "sync_notifiable";
     public static final String KEY_AUTO_TOUCH_ALL = "auto_touch_all";
     public static final String KEY_VIEW_UNREAD_ONLY = "view_unread_only";
-    public static final String KEY_DISABLE_ITEM_LINKS = "disable_item_links";
-    public static final String KEY_SHOW_ITEM_CONTROLLS = "show_item_controlls";
-    public static final String KEY_ITEM_BODY_FONT_SIZE = "item_body_font_size";
-    public static final String KEY_OMIT_ITEM_LIST = "omit_item_list";
+//    public static final String KEY_DISABLE_ITEM_LINKS = "disable_item_links";
+//    public static final String KEY_SHOW_ITEM_CONTROLLS = "show_item_controlls";
+//    public static final String KEY_ITEM_BODY_FONT_SIZE = "item_body_font_size";
+//    public static final String KEY_OMIT_ITEM_LIST = "omit_item_list";
     public static final String KEY_LAST_SYNC_TIME = "last_sync_time";
 
     public static final int SUBS_VIEW_FLAT = 1;
@@ -58,7 +58,12 @@ public class ReaderPreferences {
     public static boolean getBoolean(Context c, String name, boolean def) {
         return getPreferences(c).getBoolean(name, def);
     }
-
+    public static void putBoolean(Context c, String name, boolean value) {
+        SharedPreferences sp = getPreferences(c);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(name, value);
+        editor.commit();
+    }
     public static void putLong(Context c, String name, long value) {
         SharedPreferences sp = getPreferences(c);
         SharedPreferences.Editor editor = sp.edit();
@@ -105,22 +110,22 @@ public class ReaderPreferences {
         editor.commit();
     }
 
-    public static long getSyncInterval(Context c) {
-        String h = getString(c, KEY_SYNC_INTERVAL_HOURS);
-        int hour = 2;
-        if (h != null && h.length() != 0) {
-            hour = Integer.parseInt(h);
-        }
-        return (hour * 60 * 60 * 1000);
-    }
+//    public static long getSyncInterval(Context c) {
+//        String h = getString(c, KEY_SYNC_INTERVAL_HOURS);
+//        int hour = 2;
+//        if (h != null && h.length() != 0) {
+//            hour = Integer.parseInt(h);
+//        }
+//        return (hour * 60 * 60 * 1000);
+//    }
 
     public static boolean isSyncUnreadOnly(Context c) {
-        return getBoolean(c, KEY_SYNC_UNREAD_ONLY, true);
+        return getBoolean(c, KEY_SYNC_UNREAD_ONLY, false);
     }
 
-    public static boolean isSyncNotifiable(Context c) {
-        return getBoolean(c, KEY_SYNC_NOTIFIABLE, true);
-    }
+//    public static boolean isSyncNotifiable(Context c) {
+//        return getBoolean(c, KEY_SYNC_NOTIFIABLE, true);
+//    }
 
     public static boolean isAutoTouchAll(Context c) {
         return getBoolean(c, KEY_AUTO_TOUCH_ALL, false);
@@ -129,28 +134,31 @@ public class ReaderPreferences {
     public static boolean isViewUnreadOnly(Context c) {
         return getBoolean(c, KEY_VIEW_UNREAD_ONLY, false);
     }
-
-    public static boolean isDisableItemLinks(Context c) {
-        return getBoolean(c, KEY_DISABLE_ITEM_LINKS, false);
+    public static void setViewUnreadOnly(Context c, boolean visible) {
+        putBoolean(c, KEY_VIEW_UNREAD_ONLY, visible);
     }
 
-    public static boolean isShowItemControlls(Context c) {
-        return getBoolean(c, KEY_SHOW_ITEM_CONTROLLS, true);
-    }
-
-    public static boolean isOmitItemList(Context c) {
-        return getBoolean(c, KEY_OMIT_ITEM_LIST, false);
-    }
-
-    public static int getItemBodyFontSize(Context c) {
-        String fontSize = getString(c, KEY_ITEM_BODY_FONT_SIZE);
-        if (fontSize != null && fontSize.length() != 0) {
-            return Integer.parseInt(fontSize);
-        } else {
-            return 13;
-        }
-    }
-
+//    public static boolean isDisableItemLinks(Context c) {
+//        return getBoolean(c, KEY_DISABLE_ITEM_LINKS, false);
+//    }
+//
+//    public static boolean isShowItemControlls(Context c) {
+//        return getBoolean(c, KEY_SHOW_ITEM_CONTROLLS, true);
+//    }
+//
+//    public static boolean isOmitItemList(Context c) {
+//        return getBoolean(c, KEY_OMIT_ITEM_LIST, false);
+//    }
+//
+//    public static int getItemBodyFontSize(Context c) {
+//        String fontSize = getString(c, KEY_ITEM_BODY_FONT_SIZE);
+//        if (fontSize != null && fontSize.length() != 0) {
+//            return Integer.parseInt(fontSize);
+//        } else {
+//            return 13;
+//        }
+//    }
+//
     public static long getLastSyncTime(Context c) {
         return getLong(c, KEY_LAST_SYNC_TIME, 0);
     }

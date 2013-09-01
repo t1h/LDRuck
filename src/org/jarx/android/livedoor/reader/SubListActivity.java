@@ -1,21 +1,27 @@
 package org.jarx.android.livedoor.reader;
 
-import android.app.Activity; 
+import android.accounts.Account;
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -39,6 +45,31 @@ public class SubListActivity extends ListActivity
     private ReaderService readerService;
     private int lastPosition;
 
+    private Menu mOptionsMenu;
+    private Object mSyncObserverHandle;
+    private Boolean mRefreshStatus = false;
+
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void setRefreshActionButtonState(boolean refreshing) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            return;
+        }
+
+        if (mOptionsMenu == null) {
+            return;
+        }
+
+        final MenuItem refreshItem = mOptionsMenu.findItem(R.id.menu_item_reload);
+        if (refreshItem != null) {
+            if (refreshing) {
+                refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
+            } else {
+                refreshItem.setActionView(null);
+            }
+        }
+    }
+
     private ServiceConnection serviceConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -54,7 +85,15 @@ public class SubListActivity extends ListActivity
     private BroadcastReceiver refreshReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+
+
+
             SubListActivity.this.initListAdapter();
+
+            if(intent.getAction().equals(ReaderService.ACTION_SYNC_FINISHED)){
+
+                SubListActivity.this.setRefreshActionButtonState(false);
+            }
         }
     };
 
@@ -69,11 +108,14 @@ public class SubListActivity extends ListActivity
         IntentFilter filter = new IntentFilter();
         filter.addAction(ReaderService.ACTION_SYNC_SUBS_FINISHED);
         filter.addAction(ReaderService.ACTION_UNREAD_MODIFIED);
+        filter.addAction(ReaderService.ACTION_SYNC_FINISHED);
         registerReceiver(this.refreshReceiver, filter);
 
         ActivityHelper.bindTitle(this);
         initListAdapter();
+
     }
+
 
     @Override
     public void onResume() {
@@ -83,6 +125,7 @@ public class SubListActivity extends ListActivity
             ListView list = getListView();
             list.setSelectionFromTop(this.lastPosition, 48);
         }
+
     }
 
     @Override
@@ -104,12 +147,23 @@ public class SubListActivity extends ListActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        mOptionsMenu = menu;
         return SubListActivityHelper.onCreateOptionsMenu(this, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return SubListActivityHelper.onOptionsItemSelected(this, item);
+
+        switch (item.getItemId()) {
+            case R.id.menu_item_reload:
+//                item.setEnabled(false);
+                setRefreshActionButtonState(true);
+
+                break;
+        }
+        boolean result = SubListActivityHelper.onOptionsItemSelected(this, item);
+
+        return result;
     }
 
     @Override

@@ -49,10 +49,12 @@ public class ApiClient {
     private static final String URL_API_ALL = URL_API_BASE + "/all";
     private static final String URL_API_UNREAD = URL_API_BASE + "/unread";
     private static final String URL_API_TOUCH_ALL = URL_API_BASE + "/touch_all";
+    private static final String URL_API_TOUCH = URL_API_BASE + "/touch";
     private static final String URL_API_PIN_ALL = URL_API_BASE + "/pin/all";
     private static final String URL_API_PIN_ADD = URL_API_BASE + "/pin/add";
     private static final String URL_API_PIN_REMOVE = URL_API_BASE + "/pin/remove";
     private static final String URL_API_PIN_CLEAR = URL_API_BASE + "/pin/clear";
+    private static final String URL_API_UNSUBSCRIBE = URL_API_BASE + "/feed/unsubscribe";
     private static final String URL_RPC_NOTIFY = "http://rpc.reader.livedoor.com/notify";
 
     private final DefaultHttpClient client;
@@ -247,6 +249,22 @@ public class ApiClient {
         return (errorCode == 0 && isSuccess == 1);
     }
 
+    /** implements /api/touch */
+    public boolean touch(long subId, long timestamp)
+            throws IOException, ParseException, ReaderException {
+        initApiKey();
+
+        List<NameValuePair> params = new ArrayList<NameValuePair>(2);
+        params.add(new BasicNameValuePair("apiKey", this.apiKey));
+        params.add(new BasicNameValuePair("subscribe_id", Long.toString(subId)));
+        params.add(new BasicNameValuePair("timestamp", Long.toString(timestamp)));
+
+        JSONObject result = toJSONObject(doPostReader(URL_API_TOUCH, params));
+        int errorCode = asInt(result.get("ErrorCode"));
+        int isSuccess = asInt(result.get("isSuccess"));
+        return (errorCode == 0 && isSuccess == 1);
+    }
+
     /** implements /api/pin/all */
     public java.io.Reader readPinAll()
             throws IOException, ReaderException {
@@ -278,6 +296,21 @@ public class ApiClient {
         int isSuccess = asInt(result.get("isSuccess"));
         return (errorCode == 0 && isSuccess == 1);
     }
+
+    public boolean unsubscribe(long subId)
+            throws IOException, ParseException, ReaderException {
+        initApiKey();
+
+        List<NameValuePair> params = new ArrayList<NameValuePair>(2);
+        params.add(new BasicNameValuePair("apiKey", this.apiKey));
+        params.add(new BasicNameValuePair("subscribe_id", Long.toString(subId)));
+
+        JSONObject result = toJSONObject(doPostReader(URL_API_UNSUBSCRIBE, params));
+        int errorCode = asInt(result.get("ErrorCode"));
+        int isSuccess = asInt(result.get("isSuccess"));
+        return (errorCode == 0 && isSuccess == 1);
+    }
+
 
     /** implements /api/pin/add */
     public boolean pinRemove(String link)

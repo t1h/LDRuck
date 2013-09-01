@@ -4,28 +4,45 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
 
-    <LinearLayout
+    <FrameLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
 
         <ImageView android:id="@+id/icon_read_unread"
                 android:src="@drawable/item_unread"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|center_vertical"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical|left"
                 android:scaleType="center" />
 
         <TextView android:id="@+id/title"
                 android:layout_gravity="center_vertical"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="4dip"
-                android:paddingRight="4dip"
+                android:paddingLeft="28dip"
+                android:paddingRight="28dip"
                 android:singleLine="true"
-                android:textAppearance="@android:attr/textAppearanceSmall" />
+                android:layout_alignParentLeft="true"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
 
-    </LinearLayout>
+        <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBox"
+                android:layout_gravity="center_vertical|right"
+                android:checked="false"
+                android:focusable="false"
+                android:button="@drawable/pin_checkbox"/>
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:text=""
+                android:id="@+id/url"
+                android:visibility="gone"/>
+
+    </FrameLayout>
 
     <TextView android:id="@+id/summary"
             android:layout_gravity="center_vertical"
@@ -35,6 +52,6 @@
             android:paddingLeft="4dip"
             android:paddingRight="4dip"
             android:ellipsize="none"
-            android:textSize="12dip" />
+            android:textSize="@dimen/text_size_small" />
 
 </LinearLayout>

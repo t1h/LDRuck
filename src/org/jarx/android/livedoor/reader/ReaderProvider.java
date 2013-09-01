@@ -1,12 +1,10 @@
 package org.jarx.android.livedoor.reader;
 
-import java.util.HashMap;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -44,7 +42,7 @@ public class ReaderProvider extends ContentProvider {
 
     private static final String TAG = "ReaderProvider";
     private static final String DATABASE_NAME = "reader.db";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
 
     private static final String CONTENT_TYPE_ITEM
         = "vnd.android.cursor.item/vnd." + AUTHORITY;
@@ -151,6 +149,9 @@ public class ReaderProvider extends ContentProvider {
             for (String column: Pin.INDEX_COLUMNS) {
                 db.execSQL(sqlCreateIndex(Pin.TABLE_NAME, column));
             }
+
+            db.execSQL("DROP TABLE IF EXISTS item");
+            db.execSQL(Item.SQL_CREATE_TABLE);
         }
 
         @Override
@@ -164,6 +165,9 @@ public class ReaderProvider extends ContentProvider {
             for (String sql: Pin.sqlForUpgrade(oldVersion, newVersion)) {
                 db.execSQL(sql);
             }
+
+            db.execSQL("DROP TABLE IF EXISTS item");
+            db.execSQL(Item.SQL_CREATE_TABLE);
         }
     }
 

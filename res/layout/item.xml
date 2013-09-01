@@ -24,96 +24,84 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="32dip"
-                android:textSize="16dip"
+                android:textSize="@dimen/sub_title_text_size"
                 android:paddingLeft="8dip"
                 android:paddingRight="8dip"
                 android:gravity="center_vertical" />
 
     </LinearLayout>
+    <FrameLayout android:id="@+id/item_title_bar"
+                 android:orientation="horizontal"
+                 android:layout_width="fill_parent"
+                 android:layout_height="wrap_content">
 
+        <TextView android:id="@+id/item_title"
+                  android:layout_gravity="center"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:minHeight="36dip"
+                  android:paddingLeft="28dip"
+                  android:paddingRight="28dip"
+                  android:textSize="@dimen/text_size_medium"
+                  android:textColor="#000"
+                  android:background="#eee" />
+
+        <ImageView android:id="@+id/icon_read_unread"
+                   android:src="@drawable/item_unread"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="left|top"
+                   android:scaleType="center" />
+
+        <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/pinCheckBox"
+                android:layout_gravity="center_vertical|right"
+                android:checked="false"
+                android:focusable="false"
+                android:button="@drawable/pin_checkbox"/>
+    </FrameLayout>
     <FrameLayout
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="wrap_content">
 
         <RelativeLayout
                 android:orientation="vertical"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
+                android:layout_height="wrap_content">
 
-            <FrameLayout android:id="@+id/item_title_bar"
-                    android:orientation="horizontal"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content">
+            <ScrollView android:id="@+id/item_body_scroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fillViewport="true">
+                <TextView android:id="@+id/item_body"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:lineSpacingExtra="2sp"
+                          android:textIsSelectable="true"
 
-                <TextView android:id="@+id/item_title"
-                        android:layout_gravity="center"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="36dip"
-                        android:paddingLeft="28dip"
-                        android:paddingRight="28dip"
-                        android:textSize="14dip"
-                        android:textColor="#000"
-                        android:background="#eee" />
+                          android:paddingLeft="@dimen/activity_horizontal_margin"
+                          android:paddingRight="@dimen/activity_horizontal_margin"
+                        />
+            </ScrollView>
 
-                <ImageView android:id="@+id/icon_read_unread"
-                        android:src="@drawable/item_unread"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="left|top"
-                        android:scaleType="center" />
-
-                <ImageView android:id="@+id/pin"
-                        android:src="@drawable/pin_off"
-                        android:layout_gravity="right|top"
-                        android:paddingTop="2dip"
-                        android:paddingRight="2dip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-            </FrameLayout>
-
-            <WebView android:id="@+id/item_body"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_below="@id/item_title_bar" />
 
         </RelativeLayout>
 
         <ImageView android:id="@+id/previous"
-                android:src="@drawable/btn_left"
-                android:layout_gravity="left|bottom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="invisible" />
+                   android:src="@drawable/btn_left"
+                   android:layout_gravity="left|bottom"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:visibility="invisible" />
 
         <ImageView android:id="@+id/next"
-                android:src="@drawable/btn_right"
-                android:layout_gravity="right|bottom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="invisible" />
-
-        <LinearLayout android:id="@+id/zoom_controlls"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="bottom"
-                android:gravity="center"
-                android:visibility="invisible">
-
-            <ImageView android:id="@+id/zoom_out"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/btn_zoom_out" />
-
-            <ImageView android:id="@+id/zoom_in"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/btn_zoom_in" />
-
-        </LinearLayout>
-
+                   android:src="@drawable/btn_right"
+                   android:layout_gravity="right|bottom"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:visibility="invisible" />
     </FrameLayout>
 
 </LinearLayout>

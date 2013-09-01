@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -109,17 +110,17 @@ public class SubListActivityHelper extends ActivityHelper {
     }
 
     static void startItemActivities(Activity activity, long subId) {
-        if (ReaderPreferences.isOmitItemList(activity)) {
-            StringBuilder buff = new StringBuilder(128);
-            buff.append(Item._SUBSCRIPTION_ID).append(" = ").append(subId);
-            Intent intent = new Intent(activity, ItemActivity.class)
-                .putExtra(ActivityHelper.EXTRA_SUB_ID, subId)
-                .putExtra(ActivityHelper.EXTRA_WHERE, new Where(buff, null));
-            activity.startActivity(intent);
-        } else {
+//        if (ReaderPreferences.isOmitItemList(activity)) {
+//            StringBuilder buff = new StringBuilder(128);
+//            buff.append(Item._SUBSCRIPTION_ID).append(" = ").append(subId);
+//            Intent intent = new Intent(activity, ItemActivity.class)
+//                .putExtra(ActivityHelper.EXTRA_SUB_ID, subId)
+//                .putExtra(ActivityHelper.EXTRA_WHERE, new Where(buff, null));
+//            activity.startActivity(intent);
+//        } else {
             activity.startActivity(new Intent(activity, ItemListActivity.class)
                 .putExtra(ActivityHelper.EXTRA_SUB_ID, subId));
-        }
+//        }
     }
 
     static void touchAllLocal(final SubListable listable) {
@@ -190,6 +191,12 @@ public class SubListActivityHelper extends ActivityHelper {
     static boolean onCreateOptionsMenu(SubListable listable, Menu menu) {
         MenuInflater inflater = listable.getActivity().getMenuInflater();
         inflater.inflate(R.menu.sub_list, menu);
+
+        MenuItem item = menu.findItem(R.id.menu_item_unread_only);
+        if (item != null) {
+            item.setChecked(ReaderPreferences.isViewUnreadOnly(listable.getActivity()));
+        }
+
         return true;
     }
 
@@ -198,6 +205,7 @@ public class SubListActivityHelper extends ActivityHelper {
         final Context context = activity.getApplicationContext();
         switch (item.getItemId()) {
         case R.id.menu_item_reload:
+
             if (listable.getReaderService().startSync()) {
                 showToast(context, activity.getText(R.string.msg_sync_started));
             } else {
@@ -217,10 +225,21 @@ public class SubListActivityHelper extends ActivityHelper {
         case R.id.menu_item_pin:
             activity.startActivity(new Intent(activity, PinActivity.class));
             return true;
-        case R.id.menu_item_remove_items:
-            activity.showDialog(DIALOG_REMOVE_ITEMS);
+//        case R.id.menu_item_remove_items:
+//            activity.showDialog(DIALOG_REMOVE_ITEMS);
+//            return true;
+        case R.id.menu_item_unread_only:
+
+
+            Boolean afterStatus = !item.isChecked();
+            ReaderPreferences.setViewUnreadOnly(context, afterStatus);
+            item.setChecked(afterStatus);
+            listable.initListAdapter();
+
             return true;
+
         case R.id.menu_item_setting:
+
             activity.startActivityForResult(new Intent(activity,
                 ReaderPreferenceActivity.class), REQUEST_PREFERENCES);
             return true;
