@@ -120,7 +120,7 @@ public class ReaderPreferences {
 //    }
 
     public static boolean isSyncUnreadOnly(Context c) {
-        return getBoolean(c, KEY_SYNC_UNREAD_ONLY, false);
+        return getBoolean(c, KEY_SYNC_UNREAD_ONLY, true);
     }
 
 //    public static boolean isSyncNotifiable(Context c) {
