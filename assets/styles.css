@@ -1,0 +1,9 @@
+.item_body{
+	margin: 0px;
+	padding: 1em;
+	color:#000000;
+	font-size: 90%;
+	line-height: 150%;
+	word-wrap:break-word;
+	overflow:auto;
+}

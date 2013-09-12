@@ -30,62 +30,54 @@
                 android:gravity="center_vertical" />
 
     </LinearLayout>
-    <FrameLayout android:id="@+id/item_title_bar"
-                 android:orientation="horizontal"
-                 android:layout_width="fill_parent"
-                 android:layout_height="wrap_content">
 
-        <TextView android:id="@+id/item_title"
-                  android:layout_gravity="center"
-                  android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-                  android:minHeight="36dip"
-                  android:paddingLeft="28dip"
-                  android:paddingRight="28dip"
-                  android:textSize="@dimen/text_size_medium"
-                  android:textColor="#000"
-                  android:background="#eee" />
-
-        <ImageView android:id="@+id/icon_read_unread"
-                   android:src="@drawable/item_unread"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:layout_gravity="left|top"
-                   android:scaleType="center" />
-
-        <CheckBox
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/pinCheckBox"
-                android:layout_gravity="center_vertical|right"
-                android:checked="false"
-                android:focusable="false"
-                android:button="@drawable/pin_checkbox"/>
-    </FrameLayout>
     <FrameLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
         <RelativeLayout
-                android:orientation="vertical"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content">
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
 
-            <ScrollView android:id="@+id/item_body_scroll"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fillViewport="true">
-                <TextView android:id="@+id/item_body"
+            <FrameLayout android:id="@+id/item_title_bar"
+                         android:orientation="horizontal"
+                         android:layout_width="fill_parent"
+                         android:layout_height="wrap_content">
+
+                <TextView android:id="@+id/item_title"
+                          android:layout_gravity="center"
                           android:layout_width="fill_parent"
                           android:layout_height="wrap_content"
-                          android:lineSpacingExtra="2sp"
-                          android:textIsSelectable="true"
+                          android:minHeight="36dip"
+                          android:paddingLeft="28dip"
+                          android:paddingRight="28dip"
+                          android:textSize="@dimen/text_size_medium"
+                          android:textColor="#000"
+                          android:background="#eee" />
 
-                          android:paddingLeft="@dimen/activity_horizontal_margin"
-                          android:paddingRight="@dimen/activity_horizontal_margin"
-                        />
-            </ScrollView>
+                <ImageView android:id="@+id/icon_read_unread"
+                           android:src="@drawable/item_unread"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:layout_gravity="left|top"
+                           android:scaleType="center" />
 
+                <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/pinCheckBox"
+                        android:layout_gravity="center_vertical|right"
+                        android:checked="false"
+                        android:focusable="false"
+                        android:button="@drawable/pin_checkbox"/>
+            </FrameLayout>
+
+            <WebView android:id="@+id/item_body"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_below="@id/item_title_bar"
+/>
 
         </RelativeLayout>
 

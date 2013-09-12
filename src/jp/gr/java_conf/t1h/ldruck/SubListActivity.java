@@ -20,6 +20,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RatingBar;
@@ -44,6 +45,9 @@ public class SubListActivity extends ListActivity
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void setRefreshActionButtonState(boolean refreshing) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+
+            setProgressBarIndeterminateVisibility(refreshing);
+
             return;
         }
 
@@ -91,6 +95,8 @@ public class SubListActivity extends ListActivity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.sub_list);
 
         bindService(new Intent(this, ReaderService.class),

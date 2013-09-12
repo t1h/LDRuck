@@ -8,6 +8,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.text.Html;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.widget.TextView;
 
 import org.apache.http.HttpResponse;
@@ -21,6 +23,9 @@ public class URLImageParser implements Html.ImageGetter {
     Context c;
     TextView container;
 
+    Float scaledDensity;
+
+
     /***
      * Construct the URLImageParser which will execute AsyncTask and refresh the container
      * @param t
@@ -29,14 +34,19 @@ public class URLImageParser implements Html.ImageGetter {
     public URLImageParser(TextView t, Context c) {
         this.c = c;
         this.container = t;
+
+        DisplayMetrics m = this.c.getResources().getDisplayMetrics();
+        this.scaledDensity = m.scaledDensity;
+
     }
 
     public Drawable getDrawable(String source) {
+
         URLDrawable urlDrawable = new URLDrawable();
 
         // get the actual source
         ImageGetterAsyncTask asyncTask =
-                new ImageGetterAsyncTask( urlDrawable);
+                new ImageGetterAsyncTask( urlDrawable, this.scaledDensity);
 
         asyncTask.execute(source);
 
@@ -47,9 +57,11 @@ public class URLImageParser implements Html.ImageGetter {
 
     public class ImageGetterAsyncTask extends AsyncTask<String, Void, Drawable> {
         URLDrawable urlDrawable;
+        Float scaledDensity;
 
-        public ImageGetterAsyncTask(URLDrawable d) {
+        public ImageGetterAsyncTask(URLDrawable d, Float density) {
             this.urlDrawable = d;
+            this.scaledDensity = density;
         }
 
         @Override
@@ -61,8 +73,10 @@ public class URLImageParser implements Html.ImageGetter {
         @Override
         protected void onPostExecute(Drawable result) {
             // set the correct bound according to the result from HTTP call
-            urlDrawable.setBounds(0, 0, 0 + result.getIntrinsicWidth(), 0
-                    + result.getIntrinsicHeight());
+
+            Integer w = Math.round(result.getIntrinsicWidth() * this.scaledDensity);
+            Integer h = Math.round(result.getIntrinsicHeight() * this.scaledDensity);
+            urlDrawable.setBounds(0, 0, 0 + w, 0 + h);
 
             // change the reference of the current drawable to the result
             // from the HTTP call
@@ -73,10 +87,11 @@ public class URLImageParser implements Html.ImageGetter {
 
             // For ICS
             URLImageParser.this.container.setHeight((URLImageParser.this.container.getHeight()
-                    + result.getIntrinsicHeight()));
+                    + h));
 
             // Pre ICS
             URLImageParser.this.container.setEllipsize(null);
+
 
         }
 
@@ -94,8 +109,10 @@ public class URLImageParser implements Html.ImageGetter {
                 Bitmap b = BitmapFactory.decodeStream(is, null, options);
                 Drawable drawable = new BitmapDrawable(Resources.getSystem(), b);
 
-                drawable.setBounds(0, 0, 0 + drawable.getIntrinsicWidth(), 0
-                        + drawable.getIntrinsicHeight());
+                Integer ri = 0 + Math.round(drawable.getIntrinsicWidth() * this.scaledDensity);
+                Integer bo = 0 + Math.round(drawable.getIntrinsicHeight() * this.scaledDensity);
+
+                drawable.setBounds(0, 0, ri, bo);
                 return drawable;
             } catch (Exception e) {
                 return null;

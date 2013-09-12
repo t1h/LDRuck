@@ -192,7 +192,8 @@ public class ItemActivityHelper extends ActivityHelper {
         }
         long time = item.getCreatedOrModifiedTime();
         String author = item.getAuthor();
-        StringBuilder buff = new StringBuilder(body.length() + 256);
+        StringBuilder buff = new StringBuilder(body.length() + 512);
+        buff.append("<link rel=\"stylesheet\" href=\"styles.css\" type=\"text/css\" />");
         buff.append("<div class=\"item_info\">");
         buff.append("<a href=\"");
         buff.append(item.getUri());
@@ -211,7 +212,7 @@ public class ItemActivityHelper extends ActivityHelper {
             }
         }
         buff.append("</div>");
-        buff.append("<div class=\"item_body\" style=\"margin:8px 0 50px 0; word-wrap:break-word; overflow:auto;\">");
+        buff.append("<div class=\"item_body\" style=\"\">");
         buff.append(body);
         buff.append("</div>");
         return new String(buff);

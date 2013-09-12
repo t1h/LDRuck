@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.CursorWrapper;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
@@ -181,6 +182,8 @@ public final class Subscription implements Serializable, BaseColumns {
                     data, 0, data.length);
             }
         } catch (OutOfMemoryError e) {
+            // NOTE: ignore, display no icon
+        } catch (CursorIndexOutOfBoundsException e) {
             // NOTE: ignore, display no icon
         } finally {
             cursor.close();

@@ -1,10 +1,12 @@
 package jp.gr.java_conf.t1h.ldruck;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -20,7 +22,11 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -79,12 +85,20 @@ public class PinDetailActivity extends Activity {
 
 
         ImageView iconView = (ImageView) findViewById(R.id.sub_icon);
-        Bitmap icon = null;// sub.getIcon(this);
+        Bitmap icon = null; //sub.getIcon(this);
         if (icon == null) {
             iconView.setImageResource(R.drawable.item_read);
         } else {
             iconView.setImageBitmap(icon);
         }
+
+        final WebView bodyView = (WebView) findViewById(R.id.item_body);
+        bodyView.setOnTouchListener(new BodyWebViewTouchListener());
+        bodyView.setWebViewClient(new BodyWebViewClient());
+        WebSettings settings = bodyView.getSettings();
+        settings.setJavaScriptEnabled(false);
+        settings.setBuiltInZoomControls(false);
+        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
 
         final View previous = findViewById(R.id.previous);
         previous.setOnClickListener(new View.OnClickListener() {
@@ -487,23 +501,19 @@ public class PinDetailActivity extends Activity {
 //        boolean bindTouchControlViews = ReaderPreferences.isShowItemControlls(c);
         ImageView iconView = (ImageView) findViewById(R.id.icon_read_unread);
         TextView titleView = (TextView) findViewById(R.id.item_title);
-        TextView bodyView = (TextView) findViewById(R.id.item_body);
+        WebView bodyView = (WebView) findViewById(R.id.item_body);
         Item item = this.currentItem;
         if (item == null) {
             titleView.setText(getText(R.string.msg_no_item_for_title));
-            bodyView.setText("");
+            bodyView.clearView();
         } else {
             iconView.setImageResource(item.isUnread()
                 ? R.drawable.item_unread: R.drawable.item_read);
             titleView.setText(item.getTitle());
 
-            MovementMethod movementmethod = LinkMovementMethod.getInstance();
-            bodyView.setMovementMethod(movementmethod);
-            bodyView.setEllipsize(null);
+            bodyView.loadDataWithBaseURL("file:///android_asset/",
+                    ItemActivityHelper.createBodyHtml(item), "text/html", "UTF-8", "about:blank");
 
-            URLImageParser p = new URLImageParser(bodyView, this);
-            CharSequence bodyText = Html.fromHtml(ItemActivityHelper.createBodyHtml(item), p, null);
-            bodyView.setText(bodyText);
             this.pinView.setChecked(item.isPin());
 
             bindTouchControlViews(true);
@@ -543,5 +553,47 @@ public class PinDetailActivity extends Activity {
     public void onDestroy(){
             super.onDestroy();
             getContentResolver().unregisterContentObserver(mObserver);
+    }
+    private class BodyWebViewTouchListener implements View.OnTouchListener {
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    bindTouchControlViews(true);
+                    break;
+                case MotionEvent.ACTION_UP:
+//                scheduleHideTouchControlViews();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    break;
+            }
+            return false;
+        }
+    }
+
+    private class BodyWebViewClient extends WebViewClient {
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, final String url) {
+//            if (ReaderPreferences.isDisableItemLinks(getApplicationContext())) {
+//                return true;
+//            }
+            new AlertDialog.Builder(PinDetailActivity.this)
+                    .setTitle(R.string.msg_confirm_browse)
+                    .setMessage(url)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                        }
+                    }).show();
+            return true;
+        }
     }
 }

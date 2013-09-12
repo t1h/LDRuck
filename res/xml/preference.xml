@@ -32,18 +32,18 @@
                 android:title="@string/preference_auto_touch_all_title"
                 android:summary="@string/preference_auto_touch_all_summary" />
 
-        <CheckBoxPreference
-                android:key="sync_unread_only"
-                android:defaultValue="true"
-                android:title="@string/preference_sync_unread_only_title"
-                android:summary="@string/preference_sync_unread_only_summary" />
-<!--
-        <CheckBoxPreference
-                android:key="sync_notifiable"
-                android:defaultValue="true"
-                android:title="@string/preference_sync_notifiable_title"
-                android:summary="@string/preference_sync_notifiable_summary" />
--->
+        <!--
+                <CheckBoxPreference
+                        android:key="sync_unread_only"
+                        android:defaultValue="true"
+                        android:title="@string/preference_sync_unread_only_title"
+                        android:summary="@string/preference_sync_unread_only_summary" />
+                <CheckBoxPreference
+                        android:key="sync_notifiable"
+                        android:defaultValue="true"
+                        android:title="@string/preference_sync_notifiable_title"
+                        android:summary="@string/preference_sync_notifiable_summary" />
+        -->
     </PreferenceCategory>
 
     <PreferenceCategory
