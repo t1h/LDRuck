@@ -15,11 +15,11 @@ import java.text.MessageFormat;
 public class ReaderService extends Service {
 
     public static final String ACTION_SYNC_SUBS_FINISHED
-        = "jp.gr.java_conf.t1h.reader.action.SYNC_SUBS_FINISHED";
+        = "jp.gr.java_conf.t1h.ldruck.action.SYNC_SUBS_FINISHED";
     public static final String ACTION_UNREAD_MODIFIED
-        = "jp.gr.java_conf.t1h.reader.action.UNREAD_MODIFIED";
+        = "jp.gr.java_conf.t1h.ldruck.action.UNREAD_MODIFIED";
     public static final String ACTION_SYNC_FINISHED
-            = "jp.gr.java_conf.t1h.reader.action.SYNC_FINISHED";
+            = "jp.gr.java_conf.t1h.ldruck.action.SYNC_FINISHED";
 
     private static final String TAG = "ReaderService";
     private static final long RMAN_INTERVAL = 30 * 60 * 1000;
