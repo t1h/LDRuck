@@ -1,18 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="jp.gr.java_conf.t1h.ldruck" >
+    package="jp.gr.java_conf.t1h.ldruck"
+    android:versionCode="115"
+    android:versionName="0.1.0"
+    android:installLocation="auto">
+
+    <uses-sdk android:minSdkVersion="4"
+        android:targetSdkVersion="11"/>
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:icon="@drawable/icon"
+        android:theme="@style/AppTheme">
+
         <provider
             android:name=".ReaderProvider"
             android:authorities="jp.gr.java_conf.t1h.reader" />
+
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
@@ -118,7 +126,6 @@
         <service
             android:name=".ReaderIntentService"
             android:enabled="true" />
-
 
     </application>
 

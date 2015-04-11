@@ -16,7 +16,7 @@ import android.text.TextUtils;
 
 public class ReaderProvider extends ContentProvider {
 
-    public static final String AUTHORITY = "jp.gr.java_conf.t1h.ldruck";
+    public static final String AUTHORITY = "jp.gr.java_conf.t1h.reader";
 
     public static final String BEGIN_TXN_URI_NAME
         = "content://" + AUTHORITY + "/begin_txn";
@@ -40,7 +40,7 @@ public class ReaderProvider extends ContentProvider {
     public static final Uri URI_TXN_END = Uri.parse(END_TXN_URI_NAME);
 
     private static final String TAG = "ReaderProvider";
-    private static final String DATABASE_NAME = "ldruck.db";
+    private static final String DATABASE_NAME = "reader.db";
     private static final int DATABASE_VERSION = 8;
 
     private static final String CONTENT_TYPE_ITEM

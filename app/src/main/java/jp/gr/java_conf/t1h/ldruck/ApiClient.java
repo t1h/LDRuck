@@ -123,7 +123,7 @@ public class ApiClient {
         }
 
         List<NameValuePair> params = new ArrayList<NameValuePair>(4);
-        params.add(new BasicNameValuePair(".sv", "ldruck"));
+        params.add(new BasicNameValuePair(".sv", "reader"));
         params.add(new BasicNameValuePair(".next", URL_READER));
         params.add(new BasicNameValuePair("livedoor_id", this.loginId));
         params.add(new BasicNameValuePair("password", this.password));

@@ -25,15 +25,15 @@ import static jp.gr.java_conf.t1h.ldruck.Utils.asString;
 public class ReaderIntentService extends IntentService{
 
     public static final String ACTION_PIN_ADD
-            = "jp.gr.java_conf.t1h.ldruck.action.PIN_ADD";
+            = "jp.gr.java_conf.t1h.reader.action.PIN_ADD";
     public static final String ACTION_PIN_REMOVE
-            = "jp.gr.java_conf.t1h.ldruck.action.PIN_REMOVE";
+            = "jp.gr.java_conf.t1h.reader.action.PIN_REMOVE";
     public static final String ACTION_PIN_SYNC
-            = "jp.gr.java_conf.t1h.ldruck.action.PIN_SYNC";
+            = "jp.gr.java_conf.t1h.reader.action.PIN_SYNC";
     public static final String ACTION_SUBSCRIPTION_READ
-            = "jp.gr.java_conf.t1h.ldruck.action.SUBSCRIPTION_READ";
+            = "jp.gr.java_conf.t1h.reader.action.SUBSCRIPTION_READ";
     public static final String ACTION_UNSUBSCRIBE
-            = "jp.gr.java_conf.t1h.ldruck.action.UNSUBSCRIBE";
+            = "jp.gr.java_conf.t1h.reader.action.UNSUBSCRIBE";
 
     private static final String TAG = "ReaderIntentService";
 
