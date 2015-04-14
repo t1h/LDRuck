@@ -701,23 +701,10 @@ public class ItemActivity extends Activity
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, final String url) {
-//            if (ReaderPreferences.isDisableItemLinks(getApplicationContext())) {
-//                return true;
-//            }
-            new AlertDialog.Builder(ItemActivity.this)
-                .setTitle(R.string.msg_confirm_browse)
-                .setMessage(url)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                    }
-                }).show();
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+
             return true;
         }
     }
