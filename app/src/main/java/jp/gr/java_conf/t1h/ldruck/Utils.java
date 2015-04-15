@@ -1,5 +1,7 @@
 package jp.gr.java_conf.t1h.ldruck;
 
+import android.text.Html;
+
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -78,6 +80,10 @@ public class Utils {
 
         value = value.replaceAll("  +", " ");
         return value;
+    }
+    public static CharSequence stripHtml(String s) {
+        return Html.fromHtml(s).toString().replace('\n', (char) 32)
+                .replace((char) 160, (char) 32).replace((char) 65532, (char) 32).trim();
     }
 
     public static String htmlEscape(String value) {

@@ -4,11 +4,14 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Loader;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -16,10 +19,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -28,7 +34,7 @@ import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
 public class SubListActivity extends ListActivity
-        implements SubListActivityHelper.SubListable {
+        implements SubListActivityHelper.SubListable, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = "SubListActivity";
 
@@ -45,9 +51,7 @@ public class SubListActivity extends ListActivity
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void setRefreshActionButtonState(boolean refreshing) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-
             setProgressBarIndeterminateVisibility(refreshing);
-
             return;
         }
 
@@ -80,13 +84,7 @@ public class SubListActivity extends ListActivity
     private BroadcastReceiver refreshReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
-
-
-            SubListActivity.this.initListAdapter();
-
             if(intent.getAction().equals(ReaderService.ACTION_SYNC_FINISHED)){
-
                 SubListActivity.this.setRefreshActionButtonState(false);
             }
         }
@@ -109,19 +107,11 @@ public class SubListActivity extends ListActivity
         registerReceiver(this.refreshReceiver, filter);
 
         ActivityHelper.bindTitle(this);
-        initListAdapter();
 
-    }
+        subsAdapter = new SubsAdapter(this, null);
 
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (this.subsAdapter != null
-                && this.lastPosition < this.subsAdapter.getCount()) {
-            ListView list = getListView();
-            list.setSelectionFromTop(this.lastPosition, 48);
-        }
+        getListView().setAdapter(subsAdapter);
+        getLoaderManager().initLoader(0, null, this);
 
     }
 
@@ -185,7 +175,11 @@ public class SubListActivity extends ListActivity
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Long subId = (Long) v.getTag();
+        super.onListItemClick(l, v, position, id);
+
+        Cursor c = (Cursor) getListView().getItemAtPosition(position);
+
+        Long subId = c.getLong(c.getColumnIndex(Subscription._ID));//v.getTag();
         if (subId != null) {
             this.lastPosition = position;
             SubListActivityHelper.startItemActivities(this, subId);
@@ -203,6 +197,12 @@ public class SubListActivity extends ListActivity
 
     @Override
     public synchronized void initListAdapter() {
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.d(getClass().getSimpleName(), "onCreateLoader called.");
+
         this.lastPosition = 0;
         Context context = getApplicationContext();
         StringBuilder where = new StringBuilder(64);
@@ -216,53 +216,65 @@ public class SubListActivity extends ListActivity
             subsSort = 1;
         }
         String orderby = Subscription.SORT_ORDERS[subsSort - 1];
-        Cursor cursor = managedQuery(Subscription.CONTENT_URI, null,
-           new String(where), null, orderby);
-        if (this.subsAdapter == null) {
-            this.subsAdapter = new SubsAdapter(this, cursor);
-            setListAdapter(this.subsAdapter);
-        } else {
-            this.subsAdapter.changeCursor(cursor);
-        }
+
+        return new CursorLoader(this, Subscription.CONTENT_URI, null, where.toString(), null, orderby);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.d(getClass().getSimpleName(), "onLoadFinished called.");
+        subsAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        Log.d(getClass().getSimpleName(), "onLoaderReset called.");
+        subsAdapter.swapCursor(null);
     }
 
     private class SubsAdapter extends ResourceCursorAdapter {
-
-        private SubsAdapter(Context context, Cursor cursor) {
-            super(context, R.layout.sub_list_row,
-                new Subscription.FilterCursor(cursor), false);
+        private final class ViewHolder {
+            public TextView titleView;
+            public ImageView iconView;
+            public RatingBar ratingBar;
+            public TextView etcView;
         }
 
-        private void closeCursor() {
-            Cursor cursor = getCursor();
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
+        public SubsAdapter(Context context, Cursor cursor) {
+            super(context, R.layout.sub_list_row, null, false);
         }
+
 
         @Override
-        public void changeCursor(Cursor cursor) {
-            super.changeCursor(new Subscription.FilterCursor(cursor));
-        }
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            LayoutInflater inflater = (LayoutInflater) context.
+                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View v = inflater.inflate(R.layout.sub_list_row, null, true);
 
+            ViewHolder holder = new ViewHolder();
+            holder.iconView = (ImageView) v.findViewById(R.id.icon);
+            holder.titleView = (TextView) v.findViewById(R.id.title);
+            holder.ratingBar = (RatingBar) v.findViewById(R.id.rating_bar);
+            holder.etcView = (TextView) v.findViewById(R.id.etc);
+
+            v.setTag(holder);
+
+            return v;
+        }
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            Subscription.FilterCursor subCursor = (Subscription.FilterCursor) cursor;
 
-            ImageView iconView = (ImageView) view.findViewById(R.id.icon);
-            TextView titleView = (TextView) view.findViewById(R.id.title);
-            RatingBar ratingBar = (RatingBar) view.findViewById(R.id.rating_bar);
-            TextView etcView = (TextView) view.findViewById(R.id.etc);
+            Subscription sub = (new Subscription.FilterCursor(cursor)).getSubscription();
 
-            Subscription sub = subCursor.getSubscription();
-            titleView.setText(sub.getTitle() + " (" + sub.getUnreadCount() + ")");
-            ratingBar.setRating(sub.getRate());
-            Bitmap icon = sub.getIcon(SubListActivity.this);
+            ViewHolder holder = (ViewHolder) view.getTag();
+            holder.titleView.setText(sub.getTitle() + " (" + sub.getUnreadCount() + ")");
+            Bitmap icon = sub.getIcon(context);
             if (icon == null) {
-                iconView.setImageResource(R.drawable.item_read);
+                holder.iconView.setImageResource(R.drawable.item_read);
             } else {
-                iconView.setImageBitmap(icon);
+                holder.iconView.setImageBitmap(icon);
             }
+            holder.ratingBar.setRating(sub.getRate());
 
             StringBuilder buff = new StringBuilder(64);
             buff.append(sub.getSubscribersCount());
@@ -272,9 +284,8 @@ public class SubListActivity extends ListActivity
                 buff.append(" | ");
                 buff.append(folder);
             }
-            etcView.setText(new String(buff));
+            holder.etcView.setText(new String(buff));
 
-            view.setTag(sub.getId());
         }
     }
 }

@@ -3,15 +3,18 @@ package jp.gr.java_conf.t1h.ldruck;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Loader;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -21,10 +24,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -35,7 +40,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public class ItemListActivity extends ListActivity
-        implements ItemActivityHelper.Itemable {
+        implements ItemActivityHelper.Itemable, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = "ItemListActivity";
     private static final int DIALOG_MOVE = 3;
@@ -124,7 +129,9 @@ public class ItemListActivity extends ListActivity
             }
         });
 
-        initListAdapter();
+        mAdapter = new ItemsAdapter(this, null);
+        getListView().setAdapter(mAdapter);
+        getLoaderManager().initLoader(0, null, this);
 
         ItemActivityHelper.progressTouchFeedLocal2(this);
     }
@@ -336,7 +343,9 @@ public class ItemListActivity extends ListActivity
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Long itemId = (Long) v.getTag();
+        Cursor c = (Cursor) getListView().getItemAtPosition(position);
+        Long itemId = c.getLong(c.getColumnIndex(Item._ID));
+
         if (itemId != null) {
             this.lastItemId = itemId;
             Intent intent = new Intent(this, ItemActivity.class)
@@ -456,16 +465,6 @@ public class ItemListActivity extends ListActivity
     }
 
     private void initListAdapter() {
-        ActivityHelper.Where where = createBaseWhere();
-        String orderby = Item._ID + " desc";
-        Cursor cursor = managedQuery(Item.CONTENT_URI, null,
-            new String(where.buff), where.args, orderby);;
-        if (this.itemsAdapter == null) {
-            this.itemsAdapter = new ItemsAdapter(this, cursor);
-            setListAdapter(this.itemsAdapter);
-        } else {
-            this.itemsAdapter.changeCursor(cursor);
-        }
     }
 
     private void moveToItemId(long itemId) {
@@ -484,98 +483,80 @@ public class ItemListActivity extends ListActivity
         getListView().setSelectionFromTop(pos, 48);
     }
 
-    private void moveToLastRead() {
-        if (this.lastItemId == 0) {
-            this.lastItemId = this.sub.getReadItemId();
-        }
-        moveToItemId(this.lastItemId);
+    private ItemsAdapter mAdapter;
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.d(getClass().getSimpleName(), "onCreateLoader called.");
+
+        ActivityHelper.Where where = createBaseWhere();
+        String orderby = Item._ID + " desc";
+
+        return new CursorLoader(this, Item.CONTENT_URI, null, new String(where.buff), where.args, orderby);
     }
 
-    private void moveToNewUnread() {
-        if (this.itemsAdapter == null) {
-            return;
-        }
-        Item.FilterCursor cursor = this.itemsAdapter.getItemCursor();
-        int pos = cursor.getPosition();
-        cursor.moveToFirst();
-        while (cursor.moveToNext()) {
-            if (cursor.isUnread()) {
-                getListView().setSelectionFromTop(cursor.getPosition(), 48);
-                return;
-            }
-        }
-        cursor.moveToPosition(pos);
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.d(getClass().getSimpleName(), "onLoadFinished called.");
+        mAdapter.swapCursor(data);
     }
 
-    private void moveToOldUnread() {
-        if (this.itemsAdapter == null) {
-            return;
-        }
-        if (this.itemsAdapter == null) {
-            return;
-        }
-        Item.FilterCursor cursor = this.itemsAdapter.getItemCursor();
-        int pos = cursor.getPosition();
-        cursor.moveToLast();
-        while (cursor.moveToPrevious()) {
-            if (cursor.isUnread()) {
-                getListView().setSelectionFromTop(cursor.getPosition(), 48);
-                return;
-            }
-        }
-        cursor.moveToPosition(pos);
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        Log.d(getClass().getSimpleName(), "onLoaderReset called.");
+        mAdapter.swapCursor(null);
     }
 
     private class ItemsAdapter extends ResourceCursorAdapter {
 
-        private ItemsAdapter(Context context, Cursor cursor) {
-            super(context, R.layout.item_list_row,
-                new Item.FilterCursor(cursor), false);
+        public ItemsAdapter(Context context, Cursor cursor) {
+            super(context, R.layout.item_list_row, null, false);
         }
+
+        private final class ViewHolder {
+            public TextView titleView;
+            public ImageView iconView;
+            public TextView summaryView;
+            public TextView urlView;
+            public CheckBox pinView;
+        }
+
 
         private Item.FilterCursor getItemCursor() {
             return (Item.FilterCursor) getCursor();
         }
 
-        private void closeCursor() {
-            Cursor cursor = getCursor();
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-        }
-
         @Override
-        public void changeCursor(Cursor cursor) {
-            super.changeCursor(new Item.FilterCursor(cursor));
-        }
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            LayoutInflater inflater = (LayoutInflater) context.
+                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View v = inflater.inflate(R.layout.item_list_row, null, true);
 
+            ViewHolder holder = new ViewHolder();
+            holder.iconView = (ImageView) v.findViewById(R.id.icon_read_unread);
+            holder.titleView = (TextView) v.findViewById(R.id.title);
+            holder.summaryView = (TextView) v.findViewById(R.id.summary);
+            holder.urlView = (TextView) v.findViewById(R.id.url);
+            holder.pinView = (CheckBox) v.findViewById(R.id.checkBox);
+
+            v.setTag(holder);
+
+            return v;
+        }
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            Item.FilterCursor itemCursor = (Item.FilterCursor) cursor;
+            ViewHolder holder = (ViewHolder) view.getTag();
 
-            ImageView iconView = (ImageView) view.findViewById(R.id.icon_read_unread);
-            TextView titleView = (TextView) view.findViewById(R.id.title);
-            TextView summaryView = (TextView) view.findViewById(R.id.summary);
-            TextView urlView = (TextView) view.findViewById(R.id.url);
-            CheckBox pinView = (CheckBox) view.findViewById(R.id.checkBox);
+            Item item = (new Item.FilterCursor(cursor)).getItem();
 
-            Item item = itemCursor.getItem();
-            iconView.setImageResource(item.isUnread()
+            holder.iconView.setImageResource(item.isUnread()
                 ? R.drawable.item_unread: R.drawable.item_read);
-            titleView.setText(item.getTitle());
-            summaryView.setText(item.getSummary());
-            urlView.setText(item.getUri());
-            pinView.setChecked(item.isPin());
+            holder.titleView.setText(item.getTitle());
+            holder.summaryView.setText(item.getSummary());
+            holder.urlView.setText(item.getUri());
+            holder.pinView.setChecked(item.isPin());
 
-            view.setTag(item.getId());
-
-
-
-            Item.FilterCursor c = new Item.FilterCursor(cursor);
-
-            final String url = c.getItem().getUri();
-            final String title = c.getItem().getTitle();
-
+            final String url = item.getUri();
+            final String title = item.getTitle();
             CheckBox pinCheckbox = (CheckBox) view.findViewById(R.id.checkBox);
             pinCheckbox.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -595,14 +576,6 @@ public class ItemListActivity extends ListActivity
                     startService(intent);
                 }
             });
-
         }
-
-        @Override
-        public void onContentChanged() {
-            super.onContentChanged();
-            ItemListActivity.this.bindSubTitleView(true);
-        }
-
     }
 }

@@ -51,7 +51,8 @@
             android:paddingTop="4dip"
             android:paddingLeft="4dip"
             android:paddingRight="4dip"
-            android:ellipsize="none"
+            android:ellipsize="end"
+            android:maxLines="3"
             android:textSize="@dimen/text_size_small" />
 
 </LinearLayout>
